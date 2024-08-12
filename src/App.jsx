@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 export default function App() {
-  const { loginWithRedirect, user, isLoading, isAuthenticated, logout } =
+  const { loginWithPopup, user, isLoading, isAuthenticated, logout } =
     useAuth0();
   console.log(user);
 
@@ -25,8 +25,15 @@ export default function App() {
         </>
       ) : (
         <button
+          // onClick={() =>
+          //   loginWithRedirect({
+          //     authorizationParams: {
+          //       ui_locales: "vi",
+          //     },
+          //   })
+          // }
           onClick={() =>
-            loginWithRedirect({
+            loginWithPopup({
               authorizationParams: {
                 ui_locales: "vi",
               },
