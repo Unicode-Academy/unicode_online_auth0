@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useAuth0 } from "@auth0/auth0-react";
 import { useEffect, useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
@@ -39,6 +40,8 @@ export default function Account() {
         }
       );
       const data = await response.json();
+      console.log(data);
+
       setCurrentUser(data);
     }
   };
@@ -71,15 +74,21 @@ export default function Account() {
     e.preventDefault();
     let isUpdateEmailOrPhone = false;
 
-    if (user.email === form.email) {
-      delete form.email;
+    const { address, interest, ...rest } = form;
+    if (user.email === rest.email) {
+      delete rest.email;
     }
-    if (currentUser.phone_number === form.phone_number) {
-      delete form.phone_number;
+    if (currentUser.phone_number === rest.phone_number) {
+      delete rest.phone_number;
     } else {
       isUpdateEmailOrPhone = true;
     }
-    const status = await updateUser(form);
+    rest.user_metadata = {
+      address,
+      interest,
+    };
+
+    const status = await updateUser(rest);
     if (status) {
       if (isUpdateEmailOrPhone) {
         toast.success("Cập nhật tài khoản thành công. Vui lòng đăng nhập lại.");
@@ -104,6 +113,8 @@ export default function Account() {
       name: currentUser.name,
       email: currentUser.email,
       phone_number: currentUser.phone_number,
+      address: currentUser.user_metadata?.address,
+      interest: currentUser.user_metadata?.interest,
     });
   }, [currentUser]);
   console.log(form);
@@ -122,8 +133,7 @@ export default function Account() {
             name="name"
             className="form-control"
             placeholder="Tên..."
-            defaultValue={currentUser?.name}
-            // value={form.name ?? ""}
+            value={form?.name ?? ""}
             onChange={handleChangeValue}
             required
           />
@@ -135,7 +145,7 @@ export default function Account() {
             name="email"
             className="form-control"
             placeholder="Email..."
-            defaultValue={currentUser?.email}
+            value={form?.email ?? ""}
             onChange={handleChangeValue}
             required
           />
@@ -147,7 +157,29 @@ export default function Account() {
             name="phone_number"
             className="form-control"
             placeholder="Số điện thoại..."
-            defaultValue={currentUser?.phone_number}
+            value={form?.phone_number ?? ""}
+            onChange={handleChangeValue}
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="">Địa chỉ</label>
+          <input
+            type="text"
+            name="address"
+            className="form-control"
+            placeholder="Địa chỉ..."
+            value={form?.address ?? ""}
+            onChange={handleChangeValue}
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="">Sở thích</label>
+          <input
+            type="text"
+            name="interest"
+            className="form-control"
+            placeholder="Sở thích..."
+            value={form?.interest ?? ""}
             onChange={handleChangeValue}
           />
         </div>
