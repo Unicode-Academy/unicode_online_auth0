@@ -22,7 +22,7 @@ export default function App() {
           <p>Loading...</p>
         ) : isAuthenticated ? (
           <>
-            <span>Chào bạn: {user.nickname}</span>
+            <span>Chào bạn: {user.name}</span>
             <Link to="/account" className="btn btn-outline-primary btn-sm">
               Tài khoản
             </Link>
