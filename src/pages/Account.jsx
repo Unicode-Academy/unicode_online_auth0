@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function Account() {
   const { user, isLoading, getAccessTokenSilently, getAccessTokenWithPopup } =
     useAuth0();
+  const [currentUser, setCurrentUser] = useState({});
   const [form, setForm] = useState({});
   const getAccessToken = async () => {
     const response = await fetch(
@@ -23,6 +24,23 @@ export default function Account() {
       }
     );
     return response.json();
+  };
+  const getUser = async () => {
+    if (user?.sub) {
+      const id = user.sub;
+      const { access_token: accessToken } = await getAccessToken();
+      const response = await fetch(
+        `https://${import.meta.env.VITE_AUTH0_DOMAIN}/api/v2/users/${id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+      const data = await response.json();
+      setCurrentUser(data);
+    }
   };
   const updateUser = async (form) => {
     const id = user.sub;
@@ -51,15 +69,19 @@ export default function Account() {
   };
   const handleSubmitForm = async (e) => {
     e.preventDefault();
-    let isUpdateEmail = false;
+    let isUpdateEmailOrPhone = false;
+
     if (user.email === form.email) {
       delete form.email;
+    }
+    if (currentUser.phone_number === form.phone_number) {
+      delete form.phone_number;
     } else {
-      isUpdateEmail = true;
+      isUpdateEmailOrPhone = true;
     }
     const status = await updateUser(form);
     if (status) {
-      if (isUpdateEmail) {
+      if (isUpdateEmailOrPhone) {
         toast.success("Cập nhật tài khoản thành công. Vui lòng đăng nhập lại.");
       } else {
         toast.success("Cập nhật tài khoản thành công");
@@ -74,8 +96,18 @@ export default function Account() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
   useEffect(() => {
-    setForm({ name: user?.name, email: user?.email });
-  }, [isLoading, user]);
+    getUser();
+  }, [isLoading]);
+  useEffect(() => {
+    setForm({
+      ...form,
+      name: currentUser.name,
+      email: currentUser.email,
+      phone_number: currentUser.phone_number,
+    });
+  }, [currentUser]);
+  console.log(form);
+
   if (isLoading) {
     return <h3>Loading...</h3>;
   }
@@ -90,7 +122,7 @@ export default function Account() {
             name="name"
             className="form-control"
             placeholder="Tên..."
-            defaultValue={user?.name}
+            defaultValue={currentUser?.name}
             // value={form.name ?? ""}
             onChange={handleChangeValue}
             required
@@ -103,10 +135,20 @@ export default function Account() {
             name="email"
             className="form-control"
             placeholder="Email..."
-            defaultValue={user?.email}
-            // value={form.email ?? ""}
+            defaultValue={currentUser?.email}
             onChange={handleChangeValue}
             required
+          />
+        </div>
+        <div className="mb-3">
+          <label htmlFor="">Điện thoại</label>
+          <input
+            type="text"
+            name="phone_number"
+            className="form-control"
+            placeholder="Số điện thoại..."
+            defaultValue={currentUser?.phone_number}
+            onChange={handleChangeValue}
           />
         </div>
         <div className="d-grid">
