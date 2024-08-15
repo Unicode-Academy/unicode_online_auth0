@@ -4,6 +4,7 @@ import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Account from "./pages/Account";
 import AuthMiddleware from "./middlewares/AuthMiddleware";
+import ChangePassword from "./pages/ChangePassword";
 export default function App() {
   const { loginWithPopup, user, isLoading, isAuthenticated, logout } =
     useAuth0();
@@ -26,6 +27,12 @@ export default function App() {
             <span>Chào bạn: {user.name}</span>
             <Link to="/account" className="btn btn-outline-primary btn-sm">
               Tài khoản
+            </Link>
+            <Link
+              to="/change-password"
+              className="btn btn-outline-primary btn-sm"
+            >
+              Đổi mật khẩu
             </Link>
             <button
               className="btn btn-danger btn-sm"
@@ -56,6 +63,7 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route element={<AuthMiddleware />}>
           <Route path="/account" element={<Account />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         </Route>
       </Routes>
     </div>
