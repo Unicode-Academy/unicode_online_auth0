@@ -4,8 +4,8 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 export default function ChangePassword() {
   const [form, setForm] = useState({});
+  const { user, isLoading } = useAuth0();
   const [accessToken, setAccessToken] = useState("");
-  const { isLoading, user } = useAuth0();
   const getAccessToken = async () => {
     const response = await fetch(
       `https://${import.meta.env.VITE_AUTH0_DOMAIN}/oauth/token`,
@@ -23,6 +23,26 @@ export default function ChangePassword() {
       }
     );
     return response.json();
+  };
+  const verifyPassword = async () => {
+    const response = await fetch(
+      `https://${import.meta.env.VITE_AUTH0_DOMAIN}/oauth/token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          client_id: import.meta.env.VITE_AUTH0_API_CLIENT_ID,
+          client_secret: import.meta.env.VITE_AUTH0_API_CLIENT_SECRET,
+          audience: import.meta.env.VITE_AUTH0_API_AUDIENCE,
+          grant_type: "password",
+          username: user.email,
+          password: form.old_password,
+        }),
+      }
+    );
+    return response.ok;
   };
   const updatePassword = async () => {
     const id = user.sub;
@@ -45,6 +65,10 @@ export default function ChangePassword() {
   const handleSubmitForm = async (e) => {
     e.preventDefault();
     const { password, confirm_password } = form;
+    const verifyPasswordStatus = await verifyPassword();
+    if (!verifyPasswordStatus) {
+      return toast.error("Mật khẩu cũ không chính xác");
+    }
     if (password !== confirm_password) {
       return toast.error("Mật khẩu nhập lại không khớp");
     }
@@ -60,11 +84,10 @@ export default function ChangePassword() {
   };
   useEffect(() => {
     (async () => {
-      const response = await getAccessToken();
-      setAccessToken(response.access_token);
+      const { access_token } = await getAccessToken();
+      setAccessToken(access_token);
     })();
-  }, []);
-
+  }, [isLoading]);
   return (
     <div className="w-50 mx-auto py-3">
       <h1>Change Password</h1>
@@ -74,6 +97,17 @@ export default function ChangePassword() {
         style={{ position: "relative" }}
       >
         <fieldset>
+          <div className="mb-3">
+            <label htmlFor="">Mật khẩu cũ</label>
+            <input
+              type="password"
+              name="old_password"
+              className="form-control"
+              placeholder="Mật khẩu cũ..."
+              required
+              onChange={handleChange}
+            />
+          </div>
           <div className="mb-3">
             <label htmlFor="">Mật khẩu</label>
             <input
