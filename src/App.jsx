@@ -3,6 +3,7 @@ import { useAuth0 } from "@auth0/auth0-react";
 import { Routes, Route, Link } from "react-router-dom";
 import Home from "./pages/Home";
 import Account from "./pages/Account";
+import AuthMiddleware from "./middlewares/AuthMiddleware";
 export default function App() {
   const { loginWithPopup, user, isLoading, isAuthenticated, logout } =
     useAuth0();
@@ -53,7 +54,9 @@ export default function App() {
       </div>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/account" element={<Account />} />
+        <Route element={<AuthMiddleware />}>
+          <Route path="/account" element={<Account />} />
+        </Route>
       </Routes>
     </div>
   );
